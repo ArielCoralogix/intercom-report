@@ -46,6 +46,43 @@
 </style>
 </head>
 <body>
+<div id="auth-gate" style="position:fixed;inset:0;z-index:9999;background:linear-gradient(135deg,#1a1a2e 0%,#0f3460 100%);display:flex;align-items:center;justify-content:center">
+  <div style="background:#fff;border-radius:14px;padding:44px 48px;width:360px;box-shadow:0 20px 60px rgba(0,0,0,.4);text-align:center">
+    <div style="font-size:32px;margin-bottom:12px">🔒</div>
+    <h2 style="font-size:20px;font-weight:700;color:#1a1a2e;margin-bottom:6px">Protected Report</h2>
+    <p style="font-size:13px;color:#888;margin-bottom:24px">Enter the password to view this report</p>
+    <input id="pw-input" type="password" placeholder="Password"
+      style="width:100%;padding:11px 14px;border:1.5px solid #ddd;border-radius:8px;font-size:14px;outline:none;box-sizing:border-box;margin-bottom:12px"
+      onkeydown="if(event.key==='Enter')checkPw()">
+    <button onclick="checkPw()"
+      style="width:100%;padding:12px;background:#1a1a2e;color:#fff;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer">
+      Unlock Report
+    </button>
+    <p id="pw-err" style="color:#c0392b;font-size:12px;margin-top:10px;display:none">Incorrect password. Try again.</p>
+  </div>
+</div>
+<script>
+(function(){
+  var HASH = "ca6f570030964cf8c64ac5c8aad742ae13c459210cf95565b6c1fef6bf875793";
+  if(sessionStorage.getItem("rpt_auth")===HASH){
+    document.getElementById("auth-gate").style.display="none";
+  }
+  window.checkPw = async function(){
+    var pw = document.getElementById("pw-input").value;
+    var buf = await crypto.subtle.digest("SHA-256", new TextEncoder().encode(pw));
+    var hex = Array.from(new Uint8Array(buf)).map(b=>b.toString(16).padStart(2,"0")).join("");
+    if(hex===HASH){
+      sessionStorage.setItem("rpt_auth", HASH);
+      document.getElementById("auth-gate").style.display="none";
+    } else {
+      document.getElementById("pw-err").style.display="block";
+      document.getElementById("pw-input").value="";
+      document.getElementById("pw-input").focus();
+    }
+  };
+})();
+</script>
+
 
 <div class="hdr">
   <div class="hdr-logo">Intercom Intelligence</div>
